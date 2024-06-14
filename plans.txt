@@ -1,0 +1,19 @@
+**AIM**: to build a model that uses the different tests to predict the UPDRS delta.
+
+**ISSUES**:
+- We have too few subjects and many measurements are missing. Hence, we cannot go with a purely data-driven approach.
+- A lot of tests (from now on will be called features) correlates a lot, since they measure similar aspect of the disease (e.g., depression & anxiety) and have similar aims too. 
+- Using too many features as covariates to predict UPDRS outcomes would lead to extremely poor interpretability.
+
+**IDEA**:
+For all the aforementioned reasons, one mandatory step of the analysis is *dimensionality reduction* (DR). At the same time, we showed that data-driven DR (e.g., using feature importance of Random Forests) led to poor results, as the model insights were not backed up by sufficiently sound metrics (i.e., bad accuracy). Therefore, we now propose an alternative approach that relies more on domain knowledge of the meaning and aim of different tests performed on the patients. This new approach can be summed up in the following steps:
+1. We identify k=4,5 groups of features that share similar charachteristics in terms of expected outcomes and specific domain (e.g., emotional, motory, ...).
+2. For each group of features, we now would like to come up with a single feature expressing a (meaningful) mix of the information contained in all the features. To do this we can follow two paths:
+    a. A trivial approach consists of simply computing the Z-score (standardization) for all the features separately and then averaging out all the features to get a single one. Despite being very simple and intuitive, this approach relies on the assumption that each feature has the same importance within each group. Hence, a weighted average would be a better way to achieve this goal.
+    b. In order to compute the weights for the weighted average, we could follow this approach:
+        - For each group separately, we build a linear regression model that uses the baseline data to predict the UPDRS delta.
+        - If the linear model is somehow meaningful (i.e., not a garbage-in, garbage-out model), we could use the weights of the linear models for the group-wise weighted average of the features.
+        - Observe that the linear models above do now have the aim of predicting UPDRS for drawing scientific conclusions, but they are solely a mean to compute the relevance of different features on the outcome. Therefore, we believe that imputing the missing values using, for instance, the KNN approach could be valid in this case.
+3. The k features extracted as above can be finally used to build a linear model (or something similar) to predict the UPDRS behavior. 
+
+NOTE: this approach is similar to a nested linear model with 2 levels. However, also notice that the linear models at the group level are independent one another.
